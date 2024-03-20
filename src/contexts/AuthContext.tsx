@@ -4,6 +4,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   GithubAuthProvider,
+  UserCredential,
+  sendEmailVerification,
 } from 'firebase/auth'
 
 interface IAuthProviderProps {
@@ -20,8 +22,15 @@ export function AuthProvider({ children }: IAuthProviderProps): JSX.Element {
   const [currentUser, setCurrentUser] = useState<any>()
   const [loading, setLoading] = useState(true)
 
-  function signup(email: string, password: string): Promise<any> {
-    return auth.createUserWithEmailAndPassword(email, password)
+  async function signup(email: string, password: string): Promise<any> {
+    const newUserCreds: any = await auth.createUserWithEmailAndPassword(
+      email,
+      password
+    )
+
+    await sendEmailVerification(newUserCreds.user)
+
+    return newUserCreds
   }
 
   function googleSignin(): Promise<any> {

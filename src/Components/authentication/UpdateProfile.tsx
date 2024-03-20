@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 import { LockClosedIcon } from '@heroicons/react/20/solid'
-import { ETypes, MessageCard } from './Atoms/MessageCard'
+import { ETypes, MessageCard } from '../Atoms/MessageCard'
 import { AiFillExclamationCircle } from 'react-icons/ai'
-import { useToast, EToastTypes } from '../contexts/ToastContext'
+
+import { useAuth, useToast, EToastTypes } from '../../contexts/types'
 
 export default function UpdateProfile() {
   const emailRef = useRef<HTMLInputElement>(null)
@@ -49,7 +49,7 @@ export default function UpdateProfile() {
   return (
     <>
       <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-8 bg-white p-5 outline outline-blue-400 rounded-3xl">
           <div>
             <img
               className="mx-auto h-12 w-auto"

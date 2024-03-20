@@ -1,43 +1,36 @@
-import React, { useRef, useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import { Link, useNavigate } from 'react-router-dom'
-import { SpacerWithText } from './Atoms/SpacerWithText'
+import { useRef, useState } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
+import { Link } from 'react-router-dom'
+import { ETypes, MessageCard } from '../Atoms/MessageCard'
 import { LockClosedIcon } from '@heroicons/react/20/solid'
-import { ETypes, MessageCard } from './Atoms/MessageCard'
-import { SocialSignIn } from './SocialSignIn'
 
-export default function Signup() {
+export default function ForgotPassword() {
   const emailRef = useRef<HTMLInputElement>(null)
-  const passwordRef = useRef<HTMLInputElement>(null)
-  const passwordConfirmRef = useRef<HTMLInputElement>(null)
-  const { signup } = useAuth()
-  const [error, setError] = useState('')
+  const { resetPassword } = useAuth()
+  const [messageType, setMessageType] = useState<ETypes>(ETypes.DANGER)
+  const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
 
   async function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
 
-    if (passwordRef.current?.value !== passwordConfirmRef.current?.value) {
-      return setError('Passwords do not match')
-    }
-
     try {
-      setError('')
+      setMessage('')
       setLoading(true)
-      await signup(emailRef.current?.value, passwordRef.current?.value)
-      navigate('/')
+      await resetPassword(emailRef.current?.value)
+      setMessageType(ETypes.SUCCESS)
+      setMessage('Check your inbox for further instructions')
     } catch {
-      setError('Failed to create an account')
+      setMessageType(ETypes.DANGER)
+      setMessage('Failed to reset password')
     }
 
     setLoading(false)
   }
-
   return (
     <>
-      <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8">
+      <div className="flex min-h-full h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ">
+        <div className="w-full max-w-md space-y-8 bg-white p-5 outline outline-blue-400 rounded-3xl">
           <div>
             <img
               className="mx-auto h-12 w-auto"
@@ -45,10 +38,15 @@ export default function Signup() {
               alt="Your Company"
             />
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-              Create an account
+              Password Reset
             </h2>
           </div>
-          <MessageCard message={error} type={ETypes.DANGER} visible={!!error} />
+          <MessageCard
+            title={messageType == ETypes.SUCCESS ? 'Success' : 'Error'}
+            message={message}
+            type={messageType}
+            visible={!!message}
+          />
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="-space-y-px rounded-md shadow-sm">
@@ -65,30 +63,6 @@ export default function Signup() {
                   required
                   className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                   placeholder="Email address"
-                />
-              </div>
-              <div>
-                <label className="sr-only">Password</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  ref={passwordRef}
-                  required
-                  className="relative block w-full appearance-none rounded-none  border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Password"
-                />
-              </div>
-              <div>
-                <label className="sr-only">Confirm Password</label>
-                <input
-                  id="confirm-password"
-                  name="confirm-password"
-                  type="password"
-                  ref={passwordConfirmRef}
-                  required
-                  className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Confirm Password"
                 />
               </div>
             </div>
@@ -113,13 +87,10 @@ export default function Signup() {
                 className="font-medium text-indigo-600 hover:text-indigo-500"
                 to="/login"
               >
-                Already have an account?
+                Back to login
               </Link>
             </div>
           </form>
-
-          <SpacerWithText text="or" />
-          <SocialSignIn setError={setError} enabled={!loading} />
         </div>
       </div>
     </>
