@@ -1,2 +1,0 @@
-# catnip.solutions
-CatNip Website
