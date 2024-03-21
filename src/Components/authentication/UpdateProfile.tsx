@@ -5,6 +5,7 @@ import { ETypes, MessageCard } from '../Atoms/MessageCard'
 import { AiFillExclamationCircle } from 'react-icons/ai'
 
 import { useAuth, useToast, EToastTypes } from '../../contexts/types'
+import BGparticles from '../particles/particles'
 
 export default function UpdateProfile() {
   const emailRef = useRef<HTMLInputElement>(null)
@@ -47,8 +48,9 @@ export default function UpdateProfile() {
   }
 
   return (
-    <>
-      <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="absolute">
+      <BGparticles />
+      <div className="flex relative min-h-full h-screen w-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8 bg-white p-5 outline outline-blue-400 rounded-3xl">
           <div>
             <img
@@ -136,6 +138,6 @@ export default function UpdateProfile() {
           </form>
         </div>
       </div>
-    </>
+    </div>
   )
 }

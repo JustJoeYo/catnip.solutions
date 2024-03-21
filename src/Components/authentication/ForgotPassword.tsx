@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Link } from 'react-router-dom'
 import { ETypes, MessageCard } from '../Atoms/MessageCard'
 import { LockClosedIcon } from '@heroicons/react/20/solid'
+import BGparticles from '../particles/particles'
 
 export default function ForgotPassword() {
   const emailRef = useRef<HTMLInputElement>(null)
@@ -29,7 +30,8 @@ export default function ForgotPassword() {
   }
   return (
     <>
-      <div className="flex min-h-full h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ">
+      <BGparticles />
+      <div className="flex relative min-h-full h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ">
         <div className="w-full max-w-md space-y-8 bg-white p-5 outline outline-blue-400 rounded-3xl">
           <div>
             <img

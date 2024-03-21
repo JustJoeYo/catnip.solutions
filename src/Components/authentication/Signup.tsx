@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 import { SpacerWithText } from '../Atoms/SpacerWithText'
 import { LockClosedIcon } from '@heroicons/react/20/solid'
 import { ETypes, MessageCard } from '../Atoms/MessageCard'
 import { SocialSignIn } from './SocialSignIn'
+import BGparticles from '../particles/particles'
 
 export default function Signup() {
   const emailRef = useRef<HTMLInputElement>(null)
@@ -36,7 +37,8 @@ export default function Signup() {
 
   return (
     <>
-      <div className="flex min-h-full h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <BGparticles />
+      <div className="flex relative min-h-full h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8 bg-white p-5 outline outline-blue-400 rounded-3xl">
           <div>
             <img

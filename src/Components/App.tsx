@@ -18,10 +18,10 @@ import {
   ApiProvider,
   AppContextProviders,
 } from '../contexts/types'
-import BGParticle from './particles/particles'
 
 function App() {
   const providers = [ToastProvider, AuthProvider, ApiProvider]
+
   return (
     <>
       <Router>
