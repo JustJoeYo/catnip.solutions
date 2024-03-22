@@ -10,6 +10,7 @@ import {
   PrivateRoutes,
   ForgotPassword,
   UpdateProfile,
+  RealtimeDB,
 } from './types'
 
 import {
@@ -31,6 +32,7 @@ function App() {
               <Route element={<Dashboard />} path="/" />
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="projects" element={<Projects />} />
+              <Route path="realtimedb" element={<RealtimeDB />} />
             </Route>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
