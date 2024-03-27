@@ -20,6 +20,7 @@ export default function DashNavbar() {
     { name: 'Dashboard', href: '/', current: false },
     { name: 'Projects', href: '/projects', current: false },
     { name: 'RealtimeDB', href: '/realtimedb', current: false },
+    { name: 'Strat Roulette', href: '/stratroulette', current: false },
   ])
 
   useEffect(() => {

@@ -11,6 +11,7 @@ import {
   ForgotPassword,
   UpdateProfile,
   RealtimeDB,
+  StratRoulette,
 } from './types'
 
 import {
@@ -33,6 +34,7 @@ function App() {
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="projects" element={<Projects />} />
               <Route path="realtimedb" element={<RealtimeDB />} />
+              <Route path="stratroulette" element={<StratRoulette />} />
             </Route>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />

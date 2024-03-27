@@ -1,6 +1,6 @@
 import Dashboard from './pages/Dashboard'
 import Projects from './pages/Projects'
-
+import StratRoulette from './pages/stratroulette'
 import Login from './authentication/Login'
 import Signup from './authentication/Signup'
 import PrivateRoutes from './authentication/PrivateRoutes'
@@ -14,6 +14,7 @@ export {
   Projects,
   PageNotFound,
   RealtimeDB,
+  StratRoulette,
   Login,
   Signup,
   PrivateRoutes,
