@@ -19,7 +19,6 @@ export default function DashNavbar() {
   const [navigation, setNavigation] = useState([
     { name: 'Dashboard', href: '/', current: false },
     { name: 'Projects', href: '/projects', current: false },
-    { name: 'RealtimeDB', href: '/realtimedb', current: false },
     { name: 'Strat Roulette', href: '/stratroulette', current: false },
   ])
 

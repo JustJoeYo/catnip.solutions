@@ -10,7 +10,6 @@ import {
   PrivateRoutes,
   ForgotPassword,
   UpdateProfile,
-  RealtimeDB,
   StratRoulette,
 } from './types'
 
@@ -23,7 +22,6 @@ import {
 
 function App() {
   const providers = [ToastProvider, AuthProvider, ApiProvider]
-
   return (
     <>
       <Router>
@@ -33,7 +31,6 @@ function App() {
               <Route element={<Dashboard />} path="/" />
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="projects" element={<Projects />} />
-              <Route path="realtimedb" element={<RealtimeDB />} />
               <Route path="stratroulette" element={<StratRoulette />} />
             </Route>
             <Route path="/signup" element={<Signup />} />

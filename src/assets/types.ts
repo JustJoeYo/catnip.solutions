@@ -9,6 +9,10 @@ import Pearl from './Pearl.webp'
 import Split from './Split.webp'
 import Sunset from './Sunset.webp'
 
+import LightShield from './Light_Shields.webp'
+import HeavyShield from './Heavy_Shields.webp'
+import noShield from './noShield.png'
+
 export {
   Ascent,
   Bind,
@@ -20,4 +24,7 @@ export {
   Pearl,
   Split,
   Sunset,
+  LightShield,
+  HeavyShield,
+  noShield,
 }

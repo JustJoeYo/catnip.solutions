@@ -3,6 +3,30 @@ import { Combobox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Option } from '../data'
 
+interface CheckboxProps {
+  label: string
+  checked: boolean
+  onChange: () => void
+}
+
+export const Checkbox: React.FC<CheckboxProps> = ({
+  label,
+  checked,
+  onChange,
+}) => {
+  return (
+    <>
+      <h1 className="mx-2 text-sm">{label}</h1>
+      <input
+        className="mt-1"
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+      />
+    </>
+  )
+}
+
 interface Props {
   value: Option
   onChange: (value: Option) => void
