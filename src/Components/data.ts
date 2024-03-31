@@ -1,38 +1,11 @@
-import { useEffect } from 'react'
-import {
-  Ascent,
-  Bind,
-  Breeze,
-  Fracture,
-  Haven,
-  Icebox,
-  Lotus,
-  Pearl,
-  Split,
-  Sunset,
-  LightShield,
-  HeavyShield,
-  noShield,
-} from '../assets/types'
+import { Dispatch, SetStateAction } from 'react'
+import { onValue, DataSnapshot } from 'firebase/database'
 
 export interface Option {
   id: number
   name: string
   image: string
 }
-
-export const maps: Option[] = [
-  { id: 1, name: 'Ascent', image: Ascent },
-  { id: 2, name: 'Bind', image: Bind },
-  { id: 3, name: 'Breeze', image: Breeze },
-  { id: 4, name: 'Fracture', image: Fracture },
-  { id: 5, name: 'Haven', image: Haven },
-  { id: 6, name: 'Icebox', image: Icebox },
-  { id: 7, name: 'Lotus', image: Lotus },
-  { id: 8, name: 'Pearl', image: Pearl },
-  { id: 9, name: 'Split', image: Split },
-  { id: 10, name: 'Sunset', image: Sunset },
-]
 
 export const mapTargets = [
   { id: 1, targets: 2 },
@@ -46,25 +19,6 @@ export const mapTargets = [
   { id: 9, targets: 2 },
   { id: 10, targets: 2 },
 ]
-
-export const agentTypes: Option[] = [
-  { id: 1, name: 'Controller', image: '' },
-  { id: 2, name: 'Initiator', image: '' },
-  { id: 3, name: 'Sentinel', image: '' },
-  { id: 4, name: 'Duelist', image: '' },
-]
-
-export const teams: Option[] = [
-  { id: 1, name: 'Attackers', image: '' },
-  { id: 2, name: 'Defenders', image: '' },
-]
-
-export const armor: Option[] = [
-  { id: 1, name: 'No', image: noShield },
-  { id: 2, name: 'Light', image: LightShield },
-  { id: 3, name: 'Heavy', image: HeavyShield },
-]
-
 export interface Weapon {
   id: number
   name: string
@@ -128,6 +82,10 @@ export const agents: Agent[] = [
   { name: 'Iso', role: 'Duelist' },
 ]
 
+export interface CheckboxState {
+  [key: string]: boolean
+}
+
 interface MapItem {
   id: number
   name: string
@@ -147,34 +105,140 @@ export function filterData(maps: MapItem[], query: string): MapItem[] {
   return filteredData
 }
 
-import { getDatabase, onValue, ref, set, get } from 'firebase/database'
+export const generateRandomAgent = (
+  selectedRole: { name: string } | null,
+  setSelectedAgent: Dispatch<SetStateAction<string[]>>
+) => {
+  let randomAgent = ''
 
-type Props = { path: string }
+  if (selectedRole) {
+    // Filter agents based on selected role
+    const filteredAgents = agents.filter(
+      (agent) => agent.role === selectedRole.name
+    )
 
-export function ReadRealtimeDBdata({ path }: Props) {
-  // Get a reference to the database
-  const db = getDatabase()
+    if (filteredAgents.length > 0) {
+      // Select a random agent from the filtered list
+      const randomIndex = Math.floor(Math.random() * filteredAgents.length)
+      randomAgent = filteredAgents[randomIndex].name
+    }
+  }
 
-  // Reference to the 'data' node
-  const cartRef = ref(db, path)
+  // Update selected agents
+  setSelectedAgent((prevSelectedAgents: string[]) => [
+    randomAgent,
+    ...prevSelectedAgents,
+  ])
+}
 
-  // Attach a listener for the 'value' event
-  useEffect(() => {
-    return () => {
-      onValue(
-        cartRef,
-        (snapshot) => {
-          const Data = snapshot.val()
-          if (Data !== null) {
-            console.log(Data)
-          } else {
-            console.log('Data not found')
-          }
-        },
-        (error) => {
-          console.error('Error reading data:', error.message)
-        }
-      )
+const getRandomAffordableWeapon = (
+  remainingFunds: number,
+  checkboxes: CheckboxState,
+  weapons: Weapon[]
+): Weapon | undefined => {
+  const affordableWeapons = weapons.filter((weapon) => {
+    const isAffordable = weapon.buyPrice <= remainingFunds
+    if (!isAffordable) return false // If the weapon is not affordable, exclude it
+    if (!checkboxes.allowPistols && weapon.category === 'Pistol') return false
+    if (!checkboxes.allowShotguns && weapon.category === 'Shotgun') return false
+    if (!checkboxes.allowSnipers && weapon.category === 'Sniper') return false
+    if (!checkboxes.allowSMGS && weapon.category === 'SMG') return false
+    if (!checkboxes.allowRifles && weapon.category === 'Rifle') return false
+    if (!checkboxes.allowHeavies && weapon.category === 'Heavy') return false
+    // Add conditions for other weapon types if needed
+    else return true
+  })
+  const randomIndex = Math.floor(Math.random() * affordableWeapons.length)
+  return affordableWeapons[randomIndex]
+}
+
+export const generateStrategy = (
+  availableFunds: number,
+  setAvailableFunds: React.Dispatch<React.SetStateAction<number>>,
+  selectedMap: any | null | undefined,
+  mapTargets: any[],
+  selectedTeam: any | null | undefined,
+  selectedArmor: any,
+  checkboxes: CheckboxState,
+  setStrategies: React.Dispatch<React.SetStateAction<string[]>>
+): void => {
+  const saveAvailableFunds = availableFunds
+
+  const mapTarget = mapTargets.find((map) => map.id === selectedMap?.id)
+  if (!mapTarget) return
+
+  const targets = Array.from({ length: mapTarget.targets }, (_, index) =>
+    String.fromCharCode(65 + index)
+  )
+  const randomIndex = Math.floor(Math.random() * targets.length)
+  const selectedTarget = targets[randomIndex]
+
+  let strategy = ''
+  if (selectedTeam ? selectedTeam.name === 'Attackers' : '') {
+    strategy = `Attack target ${selectedTarget}`
+  } else if (selectedTeam ? selectedTeam.name === 'Defenders' : '') {
+    strategy = `Defend target ${selectedTarget}`
+  }
+
+  let shieldPrice = 0
+  if (selectedArmor) {
+    if (selectedArmor.name == 'Heavy') {
+      shieldPrice = 1000
+    } else if (selectedArmor.name == 'Light') {
+      shieldPrice = 400
+    } else {
+      shieldPrice = 0
+    }
+    strategy += ` purchasing ${selectedArmor.name} shield`
+  } else {
+    shieldPrice = 0
+  }
+  setAvailableFunds((prevFunds) => prevFunds - shieldPrice)
+  const remainingFundsAfterShield = availableFunds - shieldPrice
+
+  if (remainingFundsAfterShield == 0) {
+    strategy = 'RUSH B WITH CLASSIC BROKIE!'
+  } else {
+    const weapon = getRandomAffordableWeapon(
+      remainingFundsAfterShield,
+      checkboxes,
+      weapons
+    )
+    if (weapon) {
+      strategy += ` and a ${weapon.name}`
+      strategy = `<span className="text-red-500">${strategy}</span>`
+      const remainingFundsAfterWeapon =
+        remainingFundsAfterShield - weapon.buyPrice
+      setAvailableFunds(remainingFundsAfterWeapon)
+    }
+  }
+
+  setStrategies((prevStrategies) => [strategy, ...prevStrategies])
+  setAvailableFunds(saveAvailableFunds)
+}
+
+export interface Map {
+  id: number
+  name: string
+  image: string
+}
+
+export const getDataFromDatabase = (
+  dbRef: any,
+  setData: React.Dispatch<React.SetStateAction<Map[]>>,
+  setSelectedData: React.Dispatch<React.SetStateAction<Map | null>>
+) => {
+  const names: Map[] = []
+  onValue(dbRef, (snapshot: DataSnapshot) => {
+    snapshot.forEach((childSnapshot) => {
+      const data = childSnapshot.val() as Map
+      names.push(data)
+    })
+    setData(names)
+
+    // Set the default value to the first item in the database
+    if (names.length > 0) {
+      setSelectedData(names[0])
     }
   })
 }

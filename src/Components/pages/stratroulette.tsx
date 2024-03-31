@@ -1,26 +1,31 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  Option,
-  maps,
-  teams,
-  armor,
   mapTargets,
-  weapons,
-  agents,
-  agentTypes,
-  ReadRealtimeDBdata,
+  generateRandomAgent,
+  generateStrategy,
+  CheckboxState,
+  Map,
+  getDataFromDatabase,
 } from '../data'
-import { CustomCombobox, Checkbox } from '../construction/utilities'
-
-interface CheckboxState {
-  [key: string]: boolean
-}
+import CustomCombobox, { Checkbox } from '../construction/utilities'
+import { getDatabase, ref } from 'firebase/database'
 
 export default function StratRoulette() {
-  const [selectedmap, setSelectedMap] = useState(maps[0])
-  const [selectedTeam, setSelectedTeam] = useState(teams[0])
-  const [selectedArmor, setSelectedArmor] = useState(armor[0])
-  const [selectedRole, setSelectedRole] = useState(agentTypes[0])
+  const [dataFetched, setDataFetched] = useState<boolean>(false)
+
+  const [mapNames, setMapNames] = useState<Map[]>([])
+  const [selectedMap, setSelectedMap] = useState<Map | null>(null)
+
+  const [teamNames, setTeamNames] = useState<Map[]>([])
+  const [selectedTeam, setSelectedTeam] = useState<Map | null>(null)
+
+  const [armorNames, setArmorNames] = useState<Map[]>([])
+  const [selectedArmor, setSelectedArmor] = useState<Map | null>(null)
+
+  const [roleNames, setRoleNames] = useState<Map[]>([])
+  const [selectedRole, setSelectedRole] = useState<Map | null>(null)
+
+  const [query, setQuery] = useState('')
   const [strategies, setStrategies] = useState<string[]>([])
   const [availableFunds, setAvailableFunds] = useState<number>(0)
   const [selectedAgent, setSelectedAgent] = useState<string[]>([])
@@ -33,21 +38,14 @@ export default function StratRoulette() {
     allowHeavies: true,
   })
 
-  // Get data from Realtime Database
-
-  ReadRealtimeDBdata({ path: 'agentdata/' })
-  ReadRealtimeDBdata({ path: 'maptargetdata/' })
-  ReadRealtimeDBdata({ path: 'agenttypedata/' })
-  ReadRealtimeDBdata({ path: 'teamdata/' })
-  ReadRealtimeDBdata({ path: 'mapdata/' })
-  ReadRealtimeDBdata({ path: 'weapondata/' })
-  ReadRealtimeDBdata({ path: 'shielddata/' })
-
   const consoleBodyRef = useRef<HTMLDivElement>(null)
 
-  const setImageFromOption = (option: Option | null): string | undefined => {
+  const setImageFromOption = (
+    option: Map | null | undefined
+  ): string | undefined => {
     return option?.image
   }
+  const selectedMapImage = setImageFromOption(selectedMap)
 
   const handleCheckboxChange = (checkboxName: keyof CheckboxState) => {
     setCheckboxes((prevState) => ({
@@ -56,102 +54,51 @@ export default function StratRoulette() {
     }))
   }
 
-  const getRandomAffordableWeapon = (
-    remainingFunds: number,
-    checkboxes: CheckboxState
-  ) => {
-    const affordableWeapons = weapons.filter((weapon) => {
-      const isAffordable = weapon.buyPrice <= remainingFunds
-      if (!isAffordable) return false // If the weapon is not affordable, exclude it
-      if (!checkboxes.allowPistols && weapon.category === 'Pistol') return false
-      if (!checkboxes.allowShotguns && weapon.category === 'Shotgun')
-        return false
-      if (!checkboxes.allowSnipers && weapon.category === 'Sniper') return false
-      if (!checkboxes.allowSMGS && weapon.category === 'SMG') return false
-      if (!checkboxes.allowRifles && weapon.category === 'Rifle') return false
-      if (!checkboxes.allowHeavies && weapon.category === 'Heavy') return false
-      // Add conditions for other weapon types if needed
-      else return true
-    })
-    const randomIndex = Math.floor(Math.random() * affordableWeapons.length)
-    return affordableWeapons[randomIndex]
+  const handleAgentClick = () => {
+    if (selectedRole) {
+      generateRandomAgent(selectedRole, setSelectedAgent)
+    }
   }
 
-  const generateStrategy = () => {
-    const saveAvailableFunds = availableFunds
-
-    const mapTarget = mapTargets.find((map) => map.id === selectedmap.id)
-    if (!mapTarget) return
-
-    const targets = Array.from({ length: mapTarget.targets }, (_, index) =>
-      String.fromCharCode(65 + index)
+  const handleGenerateStrategyClick = () => {
+    generateStrategy(
+      availableFunds,
+      setAvailableFunds,
+      selectedMap,
+      mapTargets,
+      selectedTeam,
+      selectedArmor,
+      checkboxes,
+      setStrategies
     )
-    const randomIndex = Math.floor(Math.random() * targets.length)
-    const selectedTarget = targets[randomIndex]
-
-    let strategy = ''
-    if (selectedTeam.name === 'Attackers') {
-      strategy = `Attack target ${selectedTarget}`
-    } else if (selectedTeam.name === 'Defenders') {
-      strategy = `Defend target ${selectedTarget}`
-    }
-
-    let shieldPrice = 0
-    if (selectedArmor) {
-      if (selectedArmor.name == 'Heavy') {
-        shieldPrice = 1000
-      } else if (selectedArmor.name == 'Light') {
-        shieldPrice = 400
-      } else {
-        shieldPrice = 0
-      }
-      strategy += ` purchasing ${selectedArmor.name} shield`
-    } else {
-      shieldPrice = 0
-    }
-    setAvailableFunds((prevFunds) => prevFunds - shieldPrice)
-    const remainingFundsAfterShield = availableFunds - shieldPrice
-
-    if (remainingFundsAfterShield == 0) {
-      strategy = 'RUSH B WITH CLASSIC BROKIE!'
-    } else {
-      const weapon = getRandomAffordableWeapon(
-        remainingFundsAfterShield,
-        checkboxes
-      )
-      if (weapon) {
-        strategy += ` and a ${weapon.name}`
-        const remainingFundsAfterWeapon =
-          remainingFundsAfterShield - weapon.buyPrice
-        setAvailableFunds(remainingFundsAfterWeapon)
-      }
-    }
-
-    setStrategies((prevStrategies) => [strategy, ...prevStrategies])
-    setAvailableFunds(saveAvailableFunds)
-  }
-
-  const generateRandomAgent = () => {
-    let RandoAgent = ''
-
-    // Filter agents based on selected role
-    const filteredAgents = agents.filter(
-      (selectedAgent) => selectedAgent.role === selectedRole.name
-    )
-
-    // Select a random agent from the filtered list
-    const randomIndex = Math.floor(Math.random() * filteredAgents.length)
-    const randomAgent = filteredAgents[randomIndex].name
-    RandoAgent += randomAgent
-
-    setSelectedAgent((prevSelectedAgent) => [RandoAgent, ...prevSelectedAgent])
   }
 
   useEffect(() => {
     if (consoleBodyRef.current) {
       consoleBodyRef.current.scrollTop = consoleBodyRef.current.scrollHeight
     }
-  }, [strategies])
+
+    if (!dataFetched) {
+      const db = getDatabase()
+      getDataFromDatabase(ref(db, 'mapdata/maps'), setMapNames, setSelectedMap)
+      getDataFromDatabase(
+        ref(db, 'teamdata/teams'),
+        setTeamNames,
+        setSelectedTeam
+      )
+      getDataFromDatabase(
+        ref(db, 'shielddata/shield'),
+        setArmorNames,
+        setSelectedArmor
+      )
+      getDataFromDatabase(
+        ref(db, 'agenttypedata/agentTypes'),
+        setRoleNames,
+        setSelectedRole
+      )
+      setDataFetched(true)
+    }
+  }, [strategies, dataFetched, selectedAgent])
 
   const clearPrevConsole = () => {
     setSelectedAgent([])
@@ -165,42 +112,42 @@ export default function StratRoulette() {
           <div className="flex justify-center text-white my-5">
             <div className="mx-5">
               <CustomCombobox
+                data={roleNames}
                 value={selectedRole}
                 onChange={setSelectedRole}
-                options={agentTypes}
-                displayValue={(agentTypes: any) => agentTypes.name}
-                onSelectOption={(agentTypes: any) => agentTypes.name}
+                query={query}
+                setQuery={setQuery}
               />
             </div>
-            <div className="">
+            <div className="selectedTeamCombo">
               <CustomCombobox
+                data={teamNames}
                 value={selectedTeam}
                 onChange={setSelectedTeam}
-                options={teams}
-                displayValue={(teams: any) => teams.name}
-                onSelectOption={(teams: any) => teams.name}
+                query={query}
+                setQuery={setQuery}
               />
             </div>
             <div className="mx-5">
               <CustomCombobox
+                data={armorNames}
                 value={selectedArmor}
                 onChange={setSelectedArmor}
-                options={armor}
-                displayValue={(armor: any) => armor.name}
-                onSelectOption={(armor: any) => armor.name}
+                query={query}
+                setQuery={setQuery}
               />
             </div>
 
             {selectedArmor && (
-              <div className="flex w-8">
+              <div className="flex">
                 <img
+                  className="h-8 w-12"
                   src={setImageFromOption(selectedArmor)}
                   alt={selectedArmor.name}
                 />
               </div>
             )}
           </div>
-
           <div className="text-white w-full h-full my-7 overflow-auto">
             <div className="console-container flex flex-col h-5/6 bg-black rounded-lg border border-gray-700 shadow-lg overflow-hidden">
               <div className="console-header flex justify-end p-2">
@@ -246,14 +193,14 @@ export default function StratRoulette() {
                 <button
                   id="findStrat"
                   className=" bg-mainclr rounded-lg border border-gray-700 shadow-lg text-textclr text-center h-12 w-full hover:bg-slate-500 font-semibold"
-                  onClick={generateRandomAgent}
+                  onClick={handleAgentClick}
                 >
                   Random Agent
                 </button>
                 <button
                   id="findStrat"
                   className=" bg-mainclr mx-5 rounded-lg border border-gray-700 shadow-lg text-textclr text-center h-12 w-full hover:bg-slate-500 font-semibold"
-                  onClick={generateStrategy}
+                  onClick={handleGenerateStrategyClick}
                 >
                   Find Strategy
                 </button>
@@ -279,11 +226,11 @@ export default function StratRoulette() {
 
             <div className="mx-5">
               <CustomCombobox
-                value={selectedmap}
+                data={mapNames}
+                value={selectedMap}
                 onChange={setSelectedMap}
-                options={maps}
-                displayValue={(maps: any) => maps.name}
-                onSelectOption={(maps: any) => maps.name}
+                query={query}
+                setQuery={setQuery}
               />
             </div>
           </div>
@@ -319,11 +266,11 @@ export default function StratRoulette() {
               onChange={() => handleCheckboxChange('allowHeavies')}
             />
           </div>
-          {selectedmap && (
+          {selectedMapImage && (
             <div className="flex justify-center h-5/6">
               <img
-                src={setImageFromOption(selectedmap)}
-                alt={selectedmap.name}
+                src={selectedMapImage}
+                alt={selectedMap ? selectedMap.name : ''}
               />
             </div>
           )}
