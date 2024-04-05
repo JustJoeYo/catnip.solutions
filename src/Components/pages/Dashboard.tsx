@@ -17,9 +17,11 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const { showTypedToast } = useToast()
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(7)
+  const [itemsPerPage, setItemsPerPage] = useState(7) // State for items per page
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [selectAllChecked, setSelectAllChecked] = useState(false)
+  const [manualDeleteInput, setManualDeleteInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     const dbRef = ref(db, 'Users/')
@@ -143,12 +145,21 @@ const Dashboard: React.FC = () => {
     try {
       setLoading(true)
 
-      if (selectedItems.length === 0) {
-        showTypedToast(EToastTypes.ERROR, 'Please select items to delete!')
+      if (selectedItems.length === 0 && !manualDeleteInput) {
+        showTypedToast(
+          EToastTypes.ERROR,
+          'Please select items or provide manual input for deletion!'
+        )
         return
       }
 
-      const userToDeletePromises = selectedItems.map((userKey) => {
+      const itemsToDelete = [...selectedItems]
+      if (manualDeleteInput) {
+        // Add the manually entered key for deletion
+        itemsToDelete.push(manualDeleteInput)
+      }
+
+      const userToDeletePromises = itemsToDelete.map((userKey) => {
         const userToDeleteRef = ref(db, `Users/${userKey}`)
         return remove(userToDeleteRef)
       })
@@ -160,6 +171,7 @@ const Dashboard: React.FC = () => {
             'Selected user data deleted successfully!'
           )
           setSelectedItems([]) // Clear selected items after deletion
+          setManualDeleteInput('') // Clear manual delete input after deletion
         })
         .catch((error) => {
           console.error('Error deleting user data: ', error)
@@ -175,7 +187,17 @@ const Dashboard: React.FC = () => {
   // Logic for pagination
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  const currentItems = tableData.slice(indexOfFirstItem, indexOfLastItem)
+  // Filter table data based on search query
+  const filteredTableData = tableData.filter(
+    (user) =>
+      user.data.Username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.data.Firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.data.Lastname.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+  const currentItems = filteredTableData.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  )
 
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
@@ -203,6 +225,10 @@ const Dashboard: React.FC = () => {
     } else {
       setSelectedItems([])
     }
+  }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
   }
 
   return (
@@ -249,6 +275,14 @@ const Dashboard: React.FC = () => {
           >
             Delete User
           </button>
+          <input
+            type="text"
+            id="searchbar"
+            name="searchbar"
+            placeholder="Search for User"
+            className="mx-5"
+            onChange={handleSearchChange}
+          />
         </div>
 
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -316,7 +350,7 @@ const Dashboard: React.FC = () => {
         <nav className="mt-4 flex justify-center">
           <ul className="pagination flex">
             {Array.from({
-              length: Math.ceil(tableData.length / itemsPerPage),
+              length: Math.ceil(filteredTableData.length / itemsPerPage),
             }).map((_, index) => (
               <li key={index} className="page-item">
                 <button
