@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Disclosure, Menu } from '@headlessui/react'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import DropdownMenu, { IMenuOption } from '../Atoms/DropdownMenu'
-import { FiLogOut, FiEdit, FiEdit2 } from 'react-icons/fi'
+import { FiLogOut, FiEdit2 } from 'react-icons/fi'
 import { Link, useNavigate } from 'react-router-dom'
 import userIcon from '../../assets/1077114.png'
 
@@ -18,7 +18,7 @@ export default function DashNavbar() {
 
   const [navigation, setNavigation] = useState([
     { name: 'Dashboard', href: '/', current: false },
-    { name: 'Projects', href: '/projects', current: false },
+    { name: 'Number Guesser', href: '/numberguesser', current: false },
     { name: 'Strat Roulette', href: '/stratroulette', current: false },
   ])
 

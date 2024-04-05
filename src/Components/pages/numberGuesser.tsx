@@ -3,7 +3,7 @@ import { useToast, EToastTypes } from '../../contexts/types'
 
 let numbaaaa: Number
 
-export default function Projects() {
+export default function NumberGuesser() {
   const [loading, setLoading] = useState(false)
   const { showTypedToast } = useToast()
 
@@ -37,7 +37,7 @@ export default function Projects() {
           <input
             id="numbaaaa"
             placeholder="Number You Are Thinking Of"
-            className="text-lg outline outline-outlineclr h-24 w-64 my-20"
+            className="text-xs outline outline-outlineclr h-12 w-48 my-20"
             onInput={(e) => (numbaaaa = Number(e.currentTarget.value))}
             type="text"
             pattern="[0-9]*"
@@ -46,7 +46,7 @@ export default function Projects() {
             type="submit"
             disabled={loading}
             onClick={handleSubmit}
-            className="text-2xl outline outline-outlineclr h-24 w-64 my-20"
+            className="text-2xl outline outline-outlineclr h-12 w-32 my-20"
           >
             GUESS
           </button>

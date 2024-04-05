@@ -3,7 +3,7 @@ import 'react-toastify/dist/ReactToastify.min.css'
 
 import {
   Dashboard,
-  Projects,
+  NumberGuesser,
   PageNotFound,
   Login,
   Signup,
@@ -30,7 +30,7 @@ function App() {
             <Route element={<PrivateRoutes />}>
               <Route element={<Dashboard />} path="/" />
               <Route path="/update-profile" element={<UpdateProfile />} />
-              <Route path="/projects" element={<Projects />} />
+              <Route path="/numberguesser" element={<NumberGuesser />} />
               <Route path="/stratroulette" element={<StratRoulette />} />
             </Route>
             <Route path="/signup" element={<Signup />} />

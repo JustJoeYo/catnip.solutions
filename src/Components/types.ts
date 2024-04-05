@@ -1,5 +1,5 @@
 import Dashboard from './pages/Dashboard'
-import Projects from './pages/Projects'
+import NumberGuesser from './pages/numberGuesser'
 import StratRoulette from './pages/stratroulette'
 import Login from './authentication/Login'
 import Signup from './authentication/Signup'
@@ -10,7 +10,7 @@ import PageNotFound from './pages/pagenotfound'
 
 export {
   Dashboard,
-  Projects,
+  NumberGuesser,
   PageNotFound,
   StratRoulette,
   Login,
