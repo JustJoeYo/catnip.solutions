@@ -206,7 +206,7 @@ export const generateStrategy = (
     )
     if (weapon) {
       strategy += ` and a ${weapon.name}`
-      strategy = `<span className="text-red-500">${strategy}</span>`
+      strategy = `${strategy}`
       const remainingFundsAfterWeapon =
         remainingFundsAfterShield - weapon.buyPrice
       setAvailableFunds(remainingFundsAfterWeapon)
