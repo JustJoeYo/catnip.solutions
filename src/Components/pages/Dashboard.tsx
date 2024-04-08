@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const { showTypedToast } = useToast()
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(7) // State for items per page
+  const [itemsPerPage, setItemsPerPage] = useState(9) // State for items per page
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [selectAllChecked, setSelectAllChecked] = useState(false)
   const [manualDeleteInput, setManualDeleteInput] = useState('')
@@ -146,10 +146,7 @@ const Dashboard: React.FC = () => {
       setLoading(true)
 
       if (selectedItems.length === 0 && !manualDeleteInput) {
-        showTypedToast(
-          EToastTypes.ERROR,
-          'Please select items or provide manual input for deletion!'
-        )
+        showTypedToast(EToastTypes.ERROR, 'Please select items for deletion!')
         return
       }
 

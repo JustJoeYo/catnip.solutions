@@ -6,7 +6,7 @@ export default function PageNotFound({}: Props) {
   return (
     <>
       <BGparticles />
-      <main className="flex grid relative min-h-full h-screen place-items-center px-6 py-24 sm:py-32 lg:px-8">
+      <main className="grid relative min-h-full h-screen place-items-center px-6 py-24 sm:py-32 lg:px-8">
         <div className="text-center bg-white p-5 outline outline-blue-400 rounded-3xl">
           <p className="text-base font-semibold text-indigo-600">404</p>
           <h1 className="mt-4 text-3xl font-bold tracking-tight text-indigo-600 sm:text-5xl">

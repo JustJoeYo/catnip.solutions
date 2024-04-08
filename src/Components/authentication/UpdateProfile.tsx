@@ -11,10 +11,11 @@ export default function UpdateProfile() {
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
   const passwordConfirmRef = useRef<HTMLInputElement>(null)
-  const { currentUser, updatePassword, updateEmail } = useAuth()
+  const { currentUser, updatePassword, updateEmail, deleteAccount } = useAuth()
   const { showTypedToast } = useToast()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [deleteClicked, setDeleteClicked] = useState(0)
   const navigate = useNavigate()
 
   function handleSubmit(e: { preventDefault: () => void }) {
@@ -47,6 +48,48 @@ export default function UpdateProfile() {
       })
   }
 
+  function handleDeleteSubmit(e: { preventDefault: () => void }) {
+    e.preventDefault()
+
+    const button = document.getElementById('delete-button')
+    if (button) {
+      const randomX = Math.floor(
+        Math.random() * (window.innerWidth - button.offsetWidth)
+      )
+      const randomY = Math.floor(
+        Math.random() * (window.innerHeight - button.offsetHeight)
+      )
+      button.style.position = 'absolute'
+      button.style.left = `${randomX}px`
+      button.style.top = `${randomY}px`
+      setDeleteClicked(deleteClicked + 1)
+    }
+
+    if (deleteClicked > 10) {
+      console.log('Fine!')
+      const promises = []
+      setLoading(true)
+      setError('')
+
+      promises.push(deleteAccount())
+
+      Promise.all(promises)
+        .then(() => {
+          navigate('/')
+          showTypedToast(EToastTypes.SUCCESS, 'Profile Deleted Successfully')
+        })
+        .catch(() => {
+          setError('Failed to delete account')
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+      return
+    } else {
+      console.log('NOPE!')
+    }
+  }
+
   return (
     <div className="absolute">
       <BGparticles />
@@ -56,14 +99,14 @@ export default function UpdateProfile() {
             <img
               className="mx-auto h-12 w-auto"
               src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xMS41IC0xMC4yMzE3NCAyMyAyMC40NjM0OCI+CiAgPHRpdGxlPlJlYWN0IExvZ288L3RpdGxlPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIwIiByPSIyLjA1IiBmaWxsPSIjNjFkYWZiIi8+CiAgPGcgc3Ryb2tlPSIjNjFkYWZiIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIi8+CiAgICA8ZWxsaXBzZSByeD0iMTEiIHJ5PSI0LjIiIHRyYW5zZm9ybT0icm90YXRlKDYwKSIvPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIiB0cmFuc2Zvcm09InJvdGF0ZSgxMjApIi8+CiAgPC9nPgo8L3N2Zz4K"
-              alt="Your Company"
+              alt="Catnip.Solutions Logo"
             />
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
               Update Profile
             </h2>
           </div>
           <MessageCard message={error} type={ETypes.DANGER} visible={!!error} />
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="mt-8 space-y-6">
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="-space-y-px rounded-md shadow-sm">
               <div>
@@ -111,31 +154,46 @@ export default function UpdateProfile() {
                 />
               </div>
             </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative transition-colors flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <LockClosedIcon
-                    className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-                    aria-hidden="true"
-                  />
-                </span>
-                Update
-              </button>
-            </div>
-            <div className="text-sm text-center">
-              <Link
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-                to="/"
-              >
-                Cancel
-              </Link>
-            </div>
           </form>
+          <div>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="group relative transition-colors flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <LockClosedIcon
+                  className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
+                  aria-hidden="true"
+                />
+              </span>
+              Update
+            </button>
+          </div>
+          <div>
+            <button
+              id="delete-button"
+              onClick={handleDeleteSubmit}
+              disabled={loading}
+              className={`group relative transition-colors flex w-full justify-center rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                deleteClicked ? 'w-auto' : ''
+              }`}
+            >
+              {deleteClicked < 11
+                ? deleteClicked
+                  ? 'Are you sure?'
+                  : 'Delete'
+                : 'Fine!'}
+            </button>
+          </div>
+          <div className="text-sm text-center">
+            <Link
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+              to="/"
+            >
+              Cancel
+            </Link>
+          </div>
         </div>
       </div>
     </div>

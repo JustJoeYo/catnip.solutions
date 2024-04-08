@@ -51,6 +51,10 @@ export function AuthProvider({ children }: IAuthProviderProps): JSX.Element {
     return auth.signOut()
   }
 
+  function deleteAccount(): Promise<any> | void {
+    return currentUser.delete()
+  }
+
   function resetPassword(email: string): Promise<any> {
     return auth.sendPasswordResetEmail(email)
   }
@@ -82,6 +86,7 @@ export function AuthProvider({ children }: IAuthProviderProps): JSX.Element {
     resetPassword,
     updateEmail,
     updatePassword,
+    deleteAccount,
   }
 
   return (
