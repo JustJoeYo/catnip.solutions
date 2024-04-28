@@ -7,9 +7,11 @@ import PrivateRoutes from './authentication/PrivateRoutes'
 import ForgotPassword from './authentication/ForgotPassword'
 import UpdateProfile from './authentication/UpdateProfile'
 import PageNotFound from './pages/pagenotfound'
+import TitlePage from './pages/TitlePage'
 
 export {
   Dashboard,
+  TitlePage,
   NumberGuesser,
   PageNotFound,
   StratRoulette,

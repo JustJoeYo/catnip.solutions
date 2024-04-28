@@ -301,6 +301,7 @@ export default function BGparticles() {
                 direction: 'none',
                 drift: 0,
                 enable: true,
+
                 gravity: {
                   acceleration: 9.81,
                   enable: false,

@@ -11,6 +11,7 @@ import {
   ForgotPassword,
   UpdateProfile,
   StratRoulette,
+  TitlePage,
 } from './types'
 
 import {
@@ -28,11 +29,12 @@ function App() {
         <AppContextProviders components={providers}>
           <Routes>
             <Route element={<PrivateRoutes />}>
-              <Route element={<Dashboard />} path="/" />
+              <Route element={<Dashboard />} path="/dashboard" />
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="/numberguesser" element={<NumberGuesser />} />
               <Route path="/stratroulette" element={<StratRoulette />} />
             </Route>
+            <Route path="/" element={<TitlePage />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

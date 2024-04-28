@@ -17,7 +17,7 @@ export default function DashNavbar() {
   const { showError } = useToast()
 
   const [navigation, setNavigation] = useState([
-    { name: 'Dashboard', href: '/', current: false },
+    { name: 'Dashboard', href: '/dashboard', current: false },
     { name: 'Number Guesser', href: '/numberguesser', current: false },
     { name: 'Strat Roulette', href: '/stratroulette', current: false },
   ])
@@ -51,7 +51,7 @@ export default function DashNavbar() {
   async function handleLogout(): Promise<void> {
     try {
       await logout()
-      navigate('/login')
+      navigate('/')
     } catch (err) {
       showError(err)
     }
