@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Particles, { initParticlesEngine } from '@tsparticles/react'
 import { loadFull } from 'tsparticles'
-import { ISourceOptions } from '@tsparticles/engine'
-import type { Engine } from '@tsparticles/engine'
-import { POSITION } from 'react-toastify/dist/utils'
 
 export default function BGparticles() {
   const [init, setInit] = useState(false)
@@ -301,7 +298,6 @@ export default function BGparticles() {
                 direction: 'none',
                 drift: 0,
                 enable: true,
-
                 gravity: {
                   acceleration: 9.81,
                   enable: false,
