@@ -45,7 +45,7 @@ export default function DashNavbar() {
     },
     {
       icon: <FiLogOut />,
-      label: `Log Out`,
+      label: "Log Out",
       onClick: () => handleLogout(),
     },
   ]
