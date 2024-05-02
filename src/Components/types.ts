@@ -8,6 +8,7 @@ import ForgotPassword from './authentication/ForgotPassword'
 import UpdateProfile from './authentication/UpdateProfile'
 import PageNotFound from './pages/pagenotfound'
 import TitlePage from './pages/TitlePage'
+import Store from './pages/store'
 
 export {
   Dashboard,
@@ -20,4 +21,5 @@ export {
   PrivateRoutes,
   ForgotPassword,
   UpdateProfile,
+  Store,
 }

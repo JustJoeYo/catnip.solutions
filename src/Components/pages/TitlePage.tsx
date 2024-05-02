@@ -7,12 +7,20 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { gsap } from 'gsap'
+import { isMobile } from 'react-device-detect'
 
 let handleClick: (event: any) => void
 
 let loginrotation = 0.2
 let signuprotation = -0.2
 let textMesh: any
+let camera_distance = 0
+
+const CheckMobile = () => {
+  {
+    isMobile ? (camera_distance = 120) : (camera_distance = 60)
+  }
+}
 
 const TitlePage: React.FC = () => {
   const { currentUser } = useAuth()
@@ -25,8 +33,9 @@ const TitlePage: React.FC = () => {
 
     // Create Three.js scene
     const scene = new THREE.Scene()
+    CheckMobile()
     const camera = new THREE.PerspectiveCamera(
-      60,
+      camera_distance,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
@@ -40,11 +49,11 @@ const TitlePage: React.FC = () => {
     // Create 3D Text
     const fontLoader = new FontLoader()
     fontLoader.load(
-      '../../../public/Open Sans Extrabold_Regular.json',
+      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/fonts/helvetiker_regular.typeface.json',
       (font) => {
         const text = 'Catnip.Solutions'
         const letters = text.split('')
-        let xOffset = -300 // Start from a position further to the left
+        let xOffset = -250 // Start from a position further to the left
 
         letters.forEach((letter, index) => {
           const geometry = new TextGeometry(letter, {
@@ -87,13 +96,6 @@ const TitlePage: React.FC = () => {
         loginButton.castShadow = true // Enable shadows
         scene.add(loginButton)
 
-        // Signup Button
-        const signupButton = new THREE.Mesh(buttonGeometry, buttonMaterial)
-        signupButton.position.set(65, -80, -480) // Position underneath the text
-        signupButton.rotation.z = signuprotation // Rotate the button
-        signupButton.castShadow = true // Enable shadows
-        scene.add(signupButton)
-
         // Create text geometry and material for login button
         const loginTextGeometry = new TextGeometry('Login', {
           font: font,
@@ -108,8 +110,15 @@ const TitlePage: React.FC = () => {
           loginTextMaterial
         )
         loginTextMesh.rotation.z = loginrotation
-        loginTextMesh.position.set(-115, -96, -470) // Adjust position to be above the login button
+        loginTextMesh.position.set(-105, -96, -470) // Adjust position to be above the login button
         scene.add(loginTextMesh)
+
+        // Signup Button
+        const signupButton = new THREE.Mesh(buttonGeometry, buttonMaterial)
+        signupButton.position.set(65, -80, -480) // Position underneath the text
+        signupButton.rotation.z = signuprotation // Rotate the button
+        signupButton.castShadow = true // Enable shadows
+        scene.add(signupButton)
 
         // Create text geometry and material for signup button
         const signupTextGeometry = new TextGeometry('Signup', {
@@ -124,7 +133,7 @@ const TitlePage: React.FC = () => {
           signupTextGeometry,
           signupTextMaterial
         )
-        signupTextMesh.position.set(16, -80, -470) // Adjust position to be above the signup button
+        signupTextMesh.position.set(23, -83, -470) // Adjust position to be above the signup button
         signupTextMesh.rotation.z = signuprotation
         scene.add(signupTextMesh)
 
@@ -197,37 +206,6 @@ const TitlePage: React.FC = () => {
         boxMesh.castShadow = true // Enable shadows
         scene.add(boxMesh)
 
-        const adjustObjectScale = (
-          object:
-            | THREE.Mesh<
-                THREE.BoxGeometry,
-                THREE.MeshStandardMaterial,
-                THREE.Object3DEventMap
-              >
-            | THREE.Mesh<
-                TextGeometry,
-                THREE.MeshBasicMaterial,
-                THREE.Object3DEventMap
-              >,
-          scaleFactor = 1
-        ) => {
-          const viewportWidth = window.innerWidth
-          const viewportHeight = window.innerHeight
-
-          // Adjust the scale based on the viewport resolution
-          if (viewportWidth < 600 || viewportHeight < 600) {
-            // If the viewport width or height is less than 600px, make the object half its original size
-            object.scale.set(
-              0.5 * scaleFactor,
-              0.5 * scaleFactor,
-              0.5 * scaleFactor
-            )
-          } else {
-            // If the viewport width and height are 600px or larger, keep the object at its original size
-            object.scale.set(1 * scaleFactor, 1 * scaleFactor, 1 * scaleFactor)
-          }
-        }
-
         // Create a GSAP timeline
         const tl = gsap.timeline()
 
@@ -297,22 +275,6 @@ const TitlePage: React.FC = () => {
           z: 1.2,
           ease: 'power2.out', // Add easing for a smoother transition
         })
-
-        // Adjust the scale of the buttons and text
-        adjustObjectScale(loginButton)
-        adjustObjectScale(signupButton)
-        adjustObjectScale(loginTextMesh)
-        adjustObjectScale(signupTextMesh)
-        adjustObjectScale(boxMesh, 0.833) // 1 / 1.2 = 0.833
-
-        // Call the adjustObjectScale function whenever the window size changes
-        window.addEventListener('resize', () => {
-          adjustObjectScale(loginButton)
-          adjustObjectScale(signupButton)
-          adjustObjectScale(loginTextMesh)
-          adjustObjectScale(signupTextMesh)
-          adjustObjectScale(boxMesh, 0.833) // 1 / 1.2 = 0.833
-        })
       }
     )
 
@@ -323,18 +285,8 @@ const TitlePage: React.FC = () => {
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableRotate = false
 
-    // Resize handling
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(window.innerWidth, window.innerHeight)
-    }
-
-    window.addEventListener('resize', handleResize)
-
     // Cleanup function
     return () => {
-      window.removeEventListener('resize', handleResize)
       renderer.domElement.removeEventListener('click', handleClick)
       containerRef.current?.removeChild(renderer.domElement)
     }

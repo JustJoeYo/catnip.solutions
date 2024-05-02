@@ -10,6 +10,7 @@ import {
 } from 'firebase/database'
 
 import { useToast, EToastTypes } from '../../contexts/types'
+import { isMobile } from 'react-device-detect'
 
 const Dashboard: React.FC = () => {
   const db = getDatabase()
@@ -17,7 +18,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const { showTypedToast } = useToast()
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(9) // State for items per page
+  const [itemsPerPage, setItemsPerPage] = useState(isMobile ? 5 : 9) // State for items per page
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [selectAllChecked, setSelectAllChecked] = useState(false)
   const [manualDeleteInput, setManualDeleteInput] = useState('')
@@ -228,7 +229,146 @@ const Dashboard: React.FC = () => {
     setSearchQuery(e.target.value)
   }
 
-  return (
+  return isMobile ? (
+    <>
+      <div className="bg-popclr text-textclr outline outline-outlineclr h-full p-5 m-5 max-h-full overflow-hidden">
+        <div className="flex-row justify-center mb-2">
+          <input
+            type="text"
+            value={UsernameInput || ''}
+            id="username"
+            name="username"
+            placeholder="Username"
+            onChange={handleInputChange}
+            className="mb-1 mx-7 w-5/6"
+          />
+          <input
+            type="text"
+            value={FirstnameInput || ''}
+            id="firstname"
+            name="firstname"
+            placeholder="Firstname"
+            onChange={handleInputChange}
+            className="mb-1 mx-7 w-5/6"
+          />
+          <input
+            type="text"
+            value={LastnameInput || ''}
+            id="lastname"
+            name="lastname"
+            placeholder="Lastname"
+            onChange={handleInputChange}
+            className="mb-2 mx-7 w-5/6"
+          />
+          <div className="">
+            <button
+              className="outline outline-outlineclr h-11 w-28 text-textclr hover:bg-mainclr mb-1 mt-1"
+              onClick={(e) => {
+                handleSubmit(e)
+              }}
+            >
+              Save User
+            </button>
+            <button
+              className="outline outline-outlineclr h-11 w-28 text-textclr hover:bg-mainclr mb-2"
+              onClick={(e) => {
+                handleDeleteSubmit(e)
+              }}
+            >
+              Delete User
+            </button>
+          </div>
+          <input
+            type="text"
+            id="searchbar"
+            name="searchbar"
+            placeholder="Search for User"
+            className="mx-7 w-5/6"
+            onChange={handleSearchChange}
+          />
+        </div>
+
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <tr>
+                <th scope="col" className="p-4">
+                  <div className="flex items-center">
+                    <input
+                      id="checkbox-all-search"
+                      type="checkbox"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      onChange={handleSelectAllChange}
+                      checked={selectAllChecked}
+                    />
+                  </div>
+                </th>
+                <th scope="col" className="px-2 py-3">
+                  Index
+                </th>
+                <th scope="col" className="px-2 py-3">
+                  Username
+                </th>
+                <th scope="col" className="px-2 py-3">
+                  First Name
+                </th>
+                <th scope="col" className="px-2 py-3">
+                  Last Name
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentItems.map((rdata, index) => (
+                <tr
+                  className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
+                  key={index}
+                >
+                  <td className="w-4 p-4">
+                    <div className="flex items-center">
+                      <input
+                        id={`checkbox-table-search-${index}`}
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        onChange={(e) => handleCheckboxChange(e, rdata.key)}
+                        checked={selectedItems.includes(rdata.key)}
+                      />
+                    </div>
+                  </td>
+
+                  <th scope="row" className="py-4 px-2">
+                    {index + 1 + (currentPage - 1) * itemsPerPage}
+                  </th>
+                  <td className="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    {rdata.data.Username}
+                  </td>
+                  <td className="px-2 py-4">{rdata.data.Firstname}</td>
+                  <td className="px-2 py-4">{rdata.data.Lastname}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <nav className="mt-4 flex justify-center">
+          <ul className="pagination flex">
+            {Array.from({
+              length: Math.ceil(filteredTableData.length / itemsPerPage),
+            }).map((_, index) => (
+              <li key={index} className="page-item">
+                <button
+                  onClick={() => paginate(index + 1)}
+                  className="page-link mx-2"
+                >
+                  {index + 1}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </>
+  ) : (
     <>
       <div className="bg-popclr text-textclr outline outline-outlineclr h-full p-5 m-5 max-h-full overflow-hidden">
         <div className="flex justify-center mb-5">

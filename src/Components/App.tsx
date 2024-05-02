@@ -12,6 +12,7 @@ import {
   UpdateProfile,
   StratRoulette,
   TitlePage,
+  Store,
 } from './types'
 
 import {
@@ -30,6 +31,7 @@ function App() {
           <Routes>
             <Route element={<PrivateRoutes />}>
               <Route element={<Dashboard />} path="/dashboard" />
+              <Route path="/store" element={<Store />} />
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="/numberguesser" element={<NumberGuesser />} />
               <Route path="/stratroulette" element={<StratRoulette />} />
