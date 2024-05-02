@@ -20,30 +20,33 @@ import {
   AuthProvider,
   ApiProvider,
   AppContextProviders,
+  ShopProvider,
 } from '../contexts/types'
 
 function App() {
   const providers = [ToastProvider, AuthProvider, ApiProvider]
   return (
     <>
-      <Router>
-        <AppContextProviders components={providers}>
-          <Routes>
-            <Route element={<PrivateRoutes />}>
-              <Route element={<Dashboard />} path="/dashboard" />
-              <Route path="/store" element={<Store />} />
-              <Route path="/update-profile" element={<UpdateProfile />} />
-              <Route path="/numberguesser" element={<NumberGuesser />} />
-              <Route path="/stratroulette" element={<StratRoulette />} />
-            </Route>
-            <Route path="/" element={<TitlePage />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/*" element={<PageNotFound />} />
-          </Routes>
-        </AppContextProviders>
-      </Router>
+      <ShopProvider>
+        <Router>
+          <AppContextProviders components={providers}>
+            <Routes>
+              <Route element={<PrivateRoutes />}>
+                <Route element={<Dashboard />} path="/dashboard" />
+                <Route path="/store" element={<Store />} />
+                <Route path="/update-profile" element={<UpdateProfile />} />
+                <Route path="/numberguesser" element={<NumberGuesser />} />
+                <Route path="/stratroulette" element={<StratRoulette />} />
+              </Route>
+              <Route path="/" element={<TitlePage />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/*" element={<PageNotFound />} />
+            </Routes>
+          </AppContextProviders>
+        </Router>
+      </ShopProvider>
     </>
   )
 }

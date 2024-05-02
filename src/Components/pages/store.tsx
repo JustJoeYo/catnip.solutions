@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { ShopContext } from '../../contexts/shopContext'
 
 export interface CartItem {
   id: number
   name: string
   price: number
   salePrice?: number
+  quantity: number
   imageUrl: string
   secondimageUrl?: string
 }
@@ -15,6 +17,7 @@ const items: CartItem[] = [
     name: 'Cat',
     price: 7.99,
     salePrice: 4.99,
+    quantity: 1,
     imageUrl:
       'https://firebasestorage.googleapis.com/v0/b/catnip-4c373.appspot.com/o/imgix%2FOIG4.jpeg?alt=media&token=27e09ea2-dd8c-4854-b409-34b0b1156f12',
     secondimageUrl:
@@ -25,6 +28,7 @@ const items: CartItem[] = [
     name: 'Bear',
     price: 5.99,
     salePrice: 2.99,
+    quantity: 1,
     imageUrl:
       'https://firebasestorage.googleapis.com/v0/b/catnip-4c373.appspot.com/o/imgix%2FOIG2%20(1).jpeg?alt=media&token=7ef8006b-e8a7-4f91-ab0b-68fc2b97d78c',
     secondimageUrl:
@@ -35,6 +39,7 @@ const items: CartItem[] = [
     name: 'T-rex',
     price: 299,
     salePrice: 249,
+    quantity: 1,
     imageUrl:
       'https://firebasestorage.googleapis.com/v0/b/catnip-4c373.appspot.com/o/imgix%2FOIG2.8_dC07tQGIeP.jpeg?alt=media&token=1d340c63-c719-4c2a-bcfd-3ea0713f1ec5',
     secondimageUrl:
@@ -44,6 +49,7 @@ const items: CartItem[] = [
     id: 4,
     name: 'Dog',
     price: 9.99,
+    quantity: 1,
     imageUrl:
       'https://firebasestorage.googleapis.com/v0/b/catnip-4c373.appspot.com/o/imgix%2FOIG3.jpeg?alt=media&token=b49ab06b-12dd-40a2-a027-e51f3da68941',
     secondimageUrl:
@@ -53,6 +59,7 @@ const items: CartItem[] = [
     id: 5,
     name: 'Gecko',
     price: 34.99,
+    quantity: 1,
     imageUrl:
       'https://firebasestorage.googleapis.com/v0/b/catnip-4c373.appspot.com/o/imgix%2FOIG1.jpeg?alt=media&token=43693c80-2e58-4a6d-b8ef-88cd2f182d5f',
     secondimageUrl:
@@ -63,6 +70,7 @@ const items: CartItem[] = [
     name: 'Moto Cat',
     price: 699,
     salePrice: 449,
+    quantity: 1,
     imageUrl:
       'https://firebasestorage.googleapis.com/v0/b/catnip-4c373.appspot.com/o/imgix%2FOIG2.v.jpeg?alt=media&token=d9f14ff0-42a7-4e2c-9fc3-ea80fff1d767',
     secondimageUrl:
@@ -73,14 +81,7 @@ const items: CartItem[] = [
 type Props = {}
 
 function Store({}: Props) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-
-  // Add an item to the cart
-  const addToCart = (item: CartItem) => {
-    setCartItems((prevItems) => [...prevItems, item])
-    console.log(item.name + ' added to cart')
-  }
-
+  const { addToCart } = useContext(ShopContext)
   return (
     <>
       <div className="bg-popclr text-textclr outline outline-outlineclr h-full m-5 max-h-full flex-col justify-center overflow-scroll">
@@ -155,6 +156,7 @@ function Store({}: Props) {
                         id: index,
                         name: item.name,
                         price: item.price,
+                        quantity: item.quantity,
                         salePrice: item.salePrice,
                         imageUrl: item.imageUrl,
                       })
@@ -174,7 +176,7 @@ function Store({}: Props) {
                         d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                       />
                     </svg>
-                    Add to cart
+                    <h1 className="cursor-pointer">Add to cart</h1>
                   </a>
                 </div>
               </div>

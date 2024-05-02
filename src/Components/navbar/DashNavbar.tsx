@@ -132,10 +132,7 @@ export default function DashNavbar() {
               </div>
               <div className="absolute gap-4 inset-y-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0 right-12">
                 {/* Cart dropdown */}
-                <Cart
-                  dropDownButtonComponent={ShoppingCartPicture}
-                  options={menuOptions}
-                />
+                <Cart dropDownButtonComponent={ShoppingCartPicture} />
               </div>
               <div className="absolute gap-4 inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                 {/* Profile dropdown */}
