@@ -62,7 +62,7 @@ export function ToastProvider({ children }: IToastProviderProps): JSX.Element {
   }
 
   function showError(message: string, code?: string) {
-    toast.error(!!code ? `${code} - ${message}` : message, {
+    toast.error(Boolean(code) ? `${code} - ${message}` : message, {
       position: 'bottom-right',
       autoClose: 5000,
       hideProgressBar: false,

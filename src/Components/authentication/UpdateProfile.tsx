@@ -105,7 +105,7 @@ export default function UpdateProfile() {
               Update Profile
             </h2>
           </div>
-          <MessageCard message={error} type={ETypes.DANGER} visible={!!error} />
+          <MessageCard message={error} type={ETypes.DANGER} visible={Boolean(error)} />
           <form className="mt-8 space-y-6">
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="-space-y-px rounded-md shadow-sm">

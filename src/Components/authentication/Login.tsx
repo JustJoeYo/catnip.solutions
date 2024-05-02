@@ -48,7 +48,7 @@ export default function Login() {
               Sign in to your account
             </h2>
           </div>
-          <MessageCard message={error} type={ETypes.DANGER} visible={!!error} />
+          <MessageCard message={error} type={ETypes.DANGER} visible={Boolean(error)} />
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="-space-y-px rounded-md shadow-sm">

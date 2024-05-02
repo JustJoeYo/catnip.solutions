@@ -47,7 +47,7 @@ export default function ForgotPassword() {
             title={messageType == ETypes.SUCCESS ? 'Success' : 'Error'}
             message={message}
             type={messageType}
-            visible={!!message}
+            visible={Boolean(message)}
           />
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <input type="hidden" name="remember" defaultValue="true" />
