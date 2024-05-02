@@ -22,7 +22,7 @@ export enum EToastTypes {
 export function ToastProvider({ children }: IToastProviderProps): JSX.Element {
   function showTypedToast(
     type: EToastTypes,
-    message: string = '',
+    message = '',
     autoClose = 5000,
     hideProgressBar = false,
     closeOnClick = true,
@@ -42,7 +42,7 @@ export function ToastProvider({ children }: IToastProviderProps): JSX.Element {
   }
 
   function showToast(
-    message: string = '',
+    message = '',
     autoClose = 5000,
     hideProgressBar = false,
     closeOnClick = true,
