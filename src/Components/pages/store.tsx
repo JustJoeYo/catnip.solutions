@@ -133,7 +133,7 @@ function Store({}: Props) {
                   </a>
                   <div className="mt-2 mb-5 flex items-center justify-between">
                     <p>
-                      {item.salePrice ? (
+                      {item.salePrice !== undefined ? (
                         <>
                           <span className="text-3xl font-bold text-white">
                             ${item.salePrice}

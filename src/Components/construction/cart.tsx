@@ -1,8 +1,8 @@
 /* This example requires Tailwind CSS v2.0+ */
 import { Fragment, useContext } from 'react'
 import { Menu, Transition } from '@headlessui/react'
-import { CartItem } from '../pages/store'
 import { ShopContext } from '../../contexts/shopContext'
+import { Link } from 'react-router-dom'
 export interface IDropdownProps {
   dropDownButtonComponent: JSX.Element
 }
@@ -89,7 +89,7 @@ export default function Cart(props: IDropdownProps): JSX.Element {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 z-10 w-max origin-top-right rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute right-0 z-10 w-max origin-top-right rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-auto">
           <section className="h-max bg-gray-100 py-1 sm:py-2 lg:py-4 rounded-md">
             <div className="mx-auto px-2 sm:px-4 lg:px-6">
               <div className="flex items-center justify-center">
@@ -125,26 +125,29 @@ export default function Cart(props: IDropdownProps): JSX.Element {
                     </div>
 
                     <div className="mt-3 text-center">
-                      <button
-                        type="button"
-                        className="group inline-flex w-full items-center justify-center rounded-md bg-popclr px-6 py-4 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow hover:bg-gray-800"
-                      >
-                        Place Order
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="group-hover:ml-8 ml-4 h-6 w-6 transition-all"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
+                      <Link to="/checkout">
+                        <button
+                          type="button"
+                          disabled={cartItems.length === 0}
+                          className="group inline-flex w-full items-center justify-center rounded-md bg-popclr px-6 py-4 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow hover:bg-mainclr"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M13 7l5 5m0 0l-5 5m5-5H6"
-                          />
-                        </svg>
-                      </button>
+                          Checkout
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="group-hover:ml-8 ml-4 h-6 w-6 transition-all"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

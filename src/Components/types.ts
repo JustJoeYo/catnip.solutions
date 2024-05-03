@@ -9,6 +9,7 @@ import UpdateProfile from './authentication/UpdateProfile'
 import PageNotFound from './pages/pagenotfound'
 import TitlePage from './pages/TitlePage'
 import Store from './pages/store'
+import CheckoutPage from './pages/CheckoutPage'
 
 export {
   Dashboard,
@@ -22,4 +23,5 @@ export {
   ForgotPassword,
   UpdateProfile,
   Store,
+  CheckoutPage,
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { CartItem } from '../Components/pages/store'
 import { auth, firestoreDB } from '../firebase'
-import { collection, addDoc, getDoc, doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, onSnapshot, updateDoc } from 'firebase/firestore'
 
 export const ShopContext = React.createContext({
   cartItems: [] as CartItem[],
@@ -20,6 +20,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
       setCartItems((prevItems) => {
         const existingItem = prevItems.find((i) => i.id === item.id)
 
+        if (item.salePrice === undefined) {
+          item.salePrice = item.price
+        }
         let newItems
         if (existingItem) {
           // Increase the quantity of the existing item
@@ -32,7 +35,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const cartRef = doc(firestoreDB, 'carts', user.uid)
-        setDoc(cartRef, { items: newItems })
+        updateDoc(cartRef, { items: newItems })
 
         return newItems
       })
@@ -57,7 +60,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const cartRef = doc(firestoreDB, 'carts', user.uid)
-        setDoc(cartRef, { items: newItems })
+        updateDoc(cartRef, { items: newItems })
 
         return newItems
       })
@@ -65,30 +68,30 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         const cartRef = doc(firestoreDB, 'carts', user.uid)
 
-        try {
-          const docSnap = await getDoc(cartRef)
-
+        // Listen for changes to the cart in Firestore
+        const unsubscribeSnapshot = onSnapshot(cartRef, (docSnap) => {
           if (docSnap.exists()) {
-            // Load the cart from Firestore
+            // Update the cart from Firestore
             setCartItems(docSnap.data().items)
           } else {
-            // Save the cart to Firestore
-            await setDoc(cartRef, { items: cartItems })
+            // Initialize the cart in Firestore
+            setDoc(cartRef, { items: [] })
           }
-        } catch (e) {
-          console.error('Error getting document: ', e)
-        }
+        })
+
+        // Unsubscribe from the snapshot when the user logs out
+        return unsubscribeSnapshot
       } else {
         setCartItems([])
       }
     })
 
     return unsubscribe
-  }, [cartItems])
+  }, [])
 
   return (
     <ShopContext.Provider value={{ cartItems, addToCart, removeFromCart }}>
