@@ -17,7 +17,8 @@ function PayPal({}: Props) {
     }
     return new Promise((resolve, reject) => {
       const script = document.createElement('script')
-      script.src = 'https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID'
+      script.src =
+        'https://www.paypal.com/sdk/js?client-id=AQ3NoYwjIqSyXwZujgAHSWb5zZcsaZN0pPp_-cf1EC6Z8FDSzbWo49biPIud4d3G7_4o2ESjPOzgmuOL&currency=USD'
       script.addEventListener('load', resolve)
       script.addEventListener('error', reject)
       document.body.appendChild(script)

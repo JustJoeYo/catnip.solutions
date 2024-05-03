@@ -1,306 +1,374 @@
-import React, { useEffect, useRef, MouseEvent } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import BGparticles from '../particles/particles'
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { gsap } from 'gsap'
 import { isMobile } from 'react-device-detect'
+import { gsap } from 'gsap'
 
-let handleClick: (event: any) => void
+// Set camera distance based on device type
+let getCameraDistance = () => (isMobile ? 100 : 60)
 
-let loginrotation = 0.2
-let signuprotation = -0.2
-let textMesh: any
-let camera_distance = 0
-
-const CheckMobile = () => {
-  {
-    isMobile ? (camera_distance = 120) : (camera_distance = 60)
-  }
-}
-
-const TitlePage: React.FC = () => {
+export const TitlePage = () => {
   const { currentUser } = useAuth()
   const navigate = useNavigate()
-  const textRefs = useRef<THREE.Mesh[]>([]) // Change to an array of refs
   const containerRef = useRef<HTMLDivElement>(null)
+  const raycaster = new THREE.Raycaster()
+  const mouse = new THREE.Vector2()
+  let clickOccurred = false
 
   useEffect(() => {
     if (currentUser) navigate('/dashboard')
 
-    // Create Three.js scene
+    let signUpTextMesh: THREE.Mesh | null = null
+    let logInTextMesh: THREE.Mesh | null = null
+    let navigationOccurred = false
+    let text: THREE.Mesh | null = null
     const scene = new THREE.Scene()
-    CheckMobile()
+
     const camera = new THREE.PerspectiveCamera(
-      camera_distance,
+      getCameraDistance(),
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     )
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }) // Set alpha to true for transparent background
+    camera.position.set(0, 0, 50)
 
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.setClearColor(0x000000, 0) // Set clear color to black with 0 opacity
-    containerRef.current?.appendChild(renderer.domElement)
+    renderer.setClearColor(0x000000, 0)
 
-    // Create 3D Text
-    const fontLoader = new FontLoader()
-    fontLoader.load(
-      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/fonts/helvetiker_regular.typeface.json',
-      (font) => {
-        const text = 'Catnip.Solutions'
-        const letters = text.split('')
-        let xOffset = -250 // Start from a position further to the left
+    document.addEventListener('click', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+      clickOccurred = true
+    })
 
-        letters.forEach((letter, index) => {
-          const geometry = new TextGeometry(letter, {
-            font: font,
-            size: 45,
-            depth: 20,
-            curveSegments: 20,
-          })
+    if (containerRef.current) {
+      containerRef.current.appendChild(renderer.domElement)
+    }
 
-          geometry.computeBoundingBox() // Compute the bounding box
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.enableRotate = false
+    controls.enableZoom = false
 
-          const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
-          textMesh = new THREE.Mesh(geometry, material)
-          textMesh.position.set(xOffset, 0, -500)
-          textMesh.castShadow = true
-          textMesh.receiveShadow = true
-          textMesh.material.transparent = true
-          textMesh.material.opacity = 0
-          textRefs.current[index] = textMesh
+    renderer.domElement.style.touchAction = 'none'
 
-          scene.add(textMesh)
+    // Enable shadows in the renderer
+    renderer.shadowMap.enabled = true
 
-          // Add a null check before accessing the bounding box
-          if (geometry.boundingBox) {
-            xOffset +=
-              geometry.boundingBox.max.x - geometry.boundingBox.min.x + 10 // Add some spacing between letters
-          }
-        })
+    // Add ambient light
+    const ambientLight = new THREE.AmbientLight(0x060342, 10)
+    scene.add(ambientLight)
 
-        // Add 3D buttons
-        const buttonMaterial = new THREE.MeshStandardMaterial({
-          color: 0x080c45,
-        }) // Red color for buttons
-        const buttonGeometry = new THREE.BoxGeometry(125, 50, 20) // Adjust size as needed
+    // Add directional light
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2)
+    dirLight.position.set(0, 20, 10)
+    dirLight.castShadow = true // default false
+    scene.add(dirLight)
 
-        // Login Button
-        const loginButton = new THREE.Mesh(buttonGeometry, buttonMaterial)
-        loginButton.position.set(-75, -80, -480) // Position underneath the text
-        loginButton.rotation.z = loginrotation // Rotate the button
-        loginButton.castShadow = true // Enable shadows
-        scene.add(loginButton)
-
-        // Create text geometry and material for login button
-        const loginTextGeometry = new TextGeometry('Login', {
+    const loader = new FontLoader()
+    loader.load(
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/fonts/helvetiker_bold.typeface.json',
+      function (font) {
+        const geometry = new TextGeometry('Catnip.Solutions', {
           font: font,
-          size: 20,
-          depth: 5,
+          size: 10,
+          depth: 3,
         })
-        const loginTextMaterial = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-        })
-        const loginTextMesh = new THREE.Mesh(
-          loginTextGeometry,
-          loginTextMaterial
-        )
-        loginTextMesh.rotation.z = loginrotation
-        loginTextMesh.position.set(-105, -96, -470) // Adjust position to be above the login button
-        scene.add(loginTextMesh)
 
-        // Signup Button
-        const signupButton = new THREE.Mesh(buttonGeometry, buttonMaterial)
-        signupButton.position.set(65, -80, -480) // Position underneath the text
-        signupButton.rotation.z = signuprotation // Rotate the button
-        signupButton.castShadow = true // Enable shadows
-        scene.add(signupButton)
+        const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
+        text = new THREE.Mesh(geometry, material)
+        text.castShadow = true
+        text.receiveShadow = false
+        geometry.center() // Center the geometry
+        text.position.z = -50 // Move the text back
+        text.scale.set(0.5, 0.5, 0.5) // Scale down the text
+        text.rotation.x = -Math.PI / 9 // Rotate 45 degrees around x-axis
+        text.rotation.y = Math.PI / 8 // Rotate 45 degrees around y-axis
 
-        // Create text geometry and material for signup button
-        const signupTextGeometry = new TextGeometry('Signup', {
-          font: font,
-          size: 20,
-          depth: 5,
-        })
-        const signupTextMaterial = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-        })
-        const signupTextMesh = new THREE.Mesh(
-          signupTextGeometry,
-          signupTextMaterial
-        )
-        signupTextMesh.position.set(23, -83, -470) // Adjust position to be above the signup button
-        signupTextMesh.rotation.z = signuprotation
-        scene.add(signupTextMesh)
+        // Add the text to the scene
+        scene.add(text)
 
-        // Raycaster for mouse click detection
-        const raycaster = new THREE.Raycaster()
-        const mouse = new THREE.Vector2()
-
-        // Handle mouse click
-        handleClick = (event: MouseEvent) => {
-          event.preventDefault()
-          mouse.x = (event.clientX / window.innerWidth) * 2 - 1
-          mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
-
-          // Create a new Vector2 instance with adjusted coordinates
-          const raycasterOrigin = new THREE.Vector2(mouse.x, mouse.y - 0.1)
-
-          raycaster.setFromCamera(raycasterOrigin, camera)
-
-          // Fine-tune raycaster parameters
-          raycaster.near = camera.near
-          raycaster.far = camera.far
-
-          // Increase the button hit area with a bounding box
-          const intersects = raycaster.intersectObjects(
-            [loginButton, signupButton],
-            true
-          )
-
-          if (intersects.length > 0) {
-            const intersectedButton = intersects[0].object
-            if (intersectedButton === loginButton) {
-              navigate('/login')
-            } else if (intersectedButton === signupButton) {
-              navigate('/signup')
-            }
+        // Create the animation
+        gsap.fromTo(
+          text.rotation,
+          { y: -0.1 }, // start from -0.25 radian
+          {
+            y: 0.5, // rotate to 0.25 radian
+            repeat: -1, // repeat indefinitely
+            yoyo: true, // reverse the animation on each alternate repeat
+            ease: 'power1.inOut', // smooth start/end
+            duration: 3.25, // duration of one cycle
           }
-        }
+        )
 
-        // Add event listener for mouse click
-        renderer.domElement.addEventListener('click', handleClick)
-
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2) // Reduce ambient light intensity for better contrast
-        scene.add(ambientLight)
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8) // Increase light intensity
-        directionalLight.position.set(-1, 1, 1) // Set light direction from top-left
-        directionalLight.castShadow = true // Enable shadow casting
-        directionalLight.shadow.mapSize.width = 2048 // Increase shadow map size for heavier shadows
-        directionalLight.shadow.mapSize.height = 2048
-        scene.add(directionalLight)
-
-        // Render loop
-        const animate = () => {
-          requestAnimationFrame(animate)
-          renderer.render(scene, camera)
-        }
-
-        animate()
-
-        // Create a new box geometry and material
-        const boxGeometry = new THREE.BoxGeometry(600, 100, 20) // Adjust size as needed
+        // Add box behind "Catnip.Solutions"
+        const boxGeometry = new THREE.BoxGeometry(100, 20, 10) // Adjust size as needed
         const boxMaterial = new THREE.MeshStandardMaterial({
-          color: 0x080c45,
-        }) // Red color for box
-
-        // Create a new mesh using the box geometry and material
+          color: 0x0000ff,
+          transparent: false,
+          opacity: 0.5,
+        })
         const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial)
-        boxMesh.position.set(0, 25, -510) // Position behind the text
-        boxMesh.castShadow = true // Enable shadows
+        boxMesh.castShadow = true
+        boxMesh.receiveShadow = true
+        boxMesh.position.z = -75 // Position box behind text
+        boxMesh.rotation.x = -Math.PI / 9 // Rotate 45 degrees around x-axis
+        boxMesh.rotation.y = Math.PI / 8 // Rotate 45 degrees around y-axis
         scene.add(boxMesh)
 
-        // Create a GSAP timeline
-        const tl = gsap.timeline()
+        // Create the animation for the box
+        gsap.fromTo(
+          boxMesh.rotation,
+          { y: -0.1 }, // start from -0.25 radian
+          {
+            y: 0.5, // rotate to 0.25 radian
+            repeat: -1, // repeat indefinitely
+            yoyo: true, // reverse the animation on each alternate repeat
+            ease: 'power1.inOut', // smooth start/end
+            duration: 3.25, // duration of one cycle
+          }
+        )
 
-        // Create separate timelines for each animation
-        const tlLoginRotation = gsap.timeline()
-        const tlLoginPosition = gsap.timeline()
-        const tlSignupRotation = gsap.timeline()
-        const tlSignupPosition = gsap.timeline()
-
-        // Add an animation to the timeline for the login button and login text rotation
-        tlLoginRotation.to([loginButton.rotation, loginTextMesh.rotation], {
-          z: -0.2, // Rotate to -0.2
-          duration: 1,
-          yoyo: true, // Reverse the animation on each alternate cycle
-          repeat: -1, // Repeat the animation indefinitely
-          ease: 'power1.inOut', // Add easing for a smoother transition
-        })
-
-        // Add an animation to the timeline for the login text position
-        tlLoginPosition.to(loginTextMesh.position, {
-          y: '+=10', // Increase y position by 8
-          duration: 1,
-          yoyo: true, // Reverse the animation on each alternate cycle
-          repeat: -1, // Repeat the animation indefinitely
-          ease: 'power1.inOut', // Add easing for a smoother transition
-        })
-
-        // Add an animation to the timeline for the signup button and signup text rotation
-        tlSignupRotation.to([signupButton.rotation, signupTextMesh.rotation], {
-          z: 0.2, // Rotate to 0.2
-          duration: 1,
-          yoyo: true, // Reverse the animation on each alternate cycle
-          repeat: -1, // Repeat the animation indefinitely
-          ease: 'power1.inOut', // Add easing for a smoother transition
-        })
-
-        // Add an animation to the timeline for the signup text position
-        tlSignupPosition.to(signupTextMesh.position, {
-          y: '-=10', // Decrease y position by 8
-          duration: 1,
-          yoyo: true, // Reverse the animation on each alternate cycle
-          repeat: -1, // Repeat the animation indefinitely
-          ease: 'power1.inOut', // Add easing for a smoother transition
-        })
-
-        // Start all animations at the same time
-        tlLoginRotation.play()
-        tlLoginPosition.play()
-        tlSignupRotation.play()
-        tlSignupPosition.play()
-
-        // Add an animation to the timeline
-        textRefs.current.forEach((textMesh, index) => {
-          tl.to(textMesh.material, {
-            opacity: 1, // Fade in
-            duration: 0.15, // Increase duration for a smoother transition
-            delay: index * 0.005,
-            ease: 'power2.out', // Add easing for a smoother transition
+        // Inside font loader callback
+        const createButton = (textStr: string, position: THREE.Vector3) => {
+          const geometry = new TextGeometry(textStr, {
+            font: font,
+            size: 5,
+            depth: 5,
           })
-        })
+          const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
+          const textMesh = new THREE.Mesh(geometry, material)
+          geometry.center()
+          textMesh.castShadow = true
+          textMesh.receiveShadow = false
+          textMesh.position.copy(position)
+          textMesh.rotation.x = -Math.PI / 9
+          textMesh.rotation.y = Math.PI / 8
 
-        // Add an animation to the timeline for the box
-        tl.to(boxMesh.scale, {
-          opacity: 1, // Fade in
-          x: 1.2, // Scale up
-          y: 1.2,
-          z: 1.2,
-          ease: 'power2.out', // Add easing for a smoother transition
-        })
+          if (textStr === 'Sign Up') {
+            signUpTextMesh = textMesh
+          } else if (textStr === 'Log In') {
+            logInTextMesh = textMesh
+          }
+
+          // Create the animation
+          gsap.fromTo(
+            textMesh.rotation,
+            { y: -0.1 }, // start from -0.25 radian
+            {
+              y: 0.5, // rotate to 0.25 radian
+              repeat: -1, // repeat indefinitely
+              yoyo: true, // reverse the animation on each alternate repeat
+              ease: 'power1.inOut', // smooth start/end
+              duration: 3.25, // duration of one cycle
+            }
+          )
+
+          const boxGeometry = new THREE.BoxGeometry(35, 10, 5)
+          const boxMaterial = new THREE.MeshStandardMaterial({
+            color: 0x0000ff,
+            transparent: false,
+            opacity: 0.5,
+          })
+          const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial)
+          boxMesh.castShadow = true
+          boxMesh.receiveShadow = true
+          boxMesh.position.x = boxMesh.position.copy(position).x
+          boxMesh.position.y = boxMesh.position.copy(position).y
+          boxMesh.position.z = -51.5
+          boxMesh.rotation.x = -Math.PI / 9
+          boxMesh.rotation.y = Math.PI / 8
+
+          // Create the animation for the box
+          gsap.fromTo(
+            boxMesh.rotation,
+            { y: -0.1 }, // start from -0.25 radian
+            {
+              y: 0.5, // rotate to 0.25 radian
+              repeat: -1, // repeat indefinitely
+              yoyo: true, // reverse the animation on each alternate repeat
+              ease: 'power1.inOut', // smooth start/end
+              duration: 3.25, // duration of one cycle
+            }
+          )
+
+          // Inside createButton function
+          document.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+            raycaster.setFromCamera(mouse, camera)
+            const intersects = raycaster.intersectObjects(scene.children)
+
+            for (let i = 0; i < intersects.length; i++) {
+              if (
+                intersects[i].object === textMesh ||
+                intersects[i].object === boxMesh
+              ) {
+                gsap.to(textMesh.scale, {
+                  x: 1.1,
+                  y: 1.1,
+                  z: 1.1,
+                  duration: 0.5,
+                })
+                gsap.to(boxMesh.scale, {
+                  x: 1.1,
+                  y: 1.1,
+                  z: 1.1,
+                  duration: 0.5,
+                })
+              } else {
+                gsap.to(textMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 })
+                gsap.to(boxMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 })
+              }
+            }
+          })
+
+          document.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+            raycaster.setFromCamera(mouse, camera)
+            const intersects = raycaster.intersectObjects(scene.children)
+
+            for (let i = 0; i < intersects.length; i++) {
+              if (
+                intersects[i].object === textMesh ||
+                intersects[i].object === boxMesh
+              ) {
+                gsap.to(textMesh.scale, {
+                  x: 0.9,
+                  y: 0.9,
+                  z: 0.9,
+                  duration: 0.5,
+                })
+                gsap.to(boxMesh.scale, {
+                  x: 0.9,
+                  y: 0.9,
+                  z: 0.9,
+                  duration: 0.5,
+                })
+              } else {
+                gsap.to(textMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 })
+                gsap.to(boxMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 })
+              }
+            }
+          })
+
+          document.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+            raycaster.setFromCamera(mouse, camera)
+            const intersects = raycaster.intersectObjects(scene.children)
+
+            for (let i = 0; i < intersects.length; i++) {
+              if (
+                intersects[i].object === textMesh ||
+                intersects[i].object === boxMesh
+              ) {
+                gsap.to(textMesh.scale, {
+                  x: 0.9,
+                  y: 0.9,
+                  z: 0.9,
+                  duration: 0.5,
+                })
+                gsap.to(boxMesh.scale, {
+                  x: 0.9,
+                  y: 0.9,
+                  z: 0.9,
+                  duration: 0.5,
+                })
+
+                // Add fade-out animation
+                gsap.to(scene.children, {
+                  opacity: 0,
+                  duration: 0.75,
+                  onComplete: () => {
+                    // Redirect to the next page
+                    if (
+                      textStr === 'Sign Up' ||
+                      intersects[i].object === signUpTextMesh
+                    ) {
+                      window.location.href = 'signup'
+                    } else if (
+                      textStr === 'Log In' ||
+                      intersects[i].object === logInTextMesh
+                    ) {
+                      window.location.href = 'login'
+                    }
+                  },
+                })
+              } else {
+                gsap.to(textMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 })
+                gsap.to(boxMesh.scale, { x: 1, y: 1, z: 1, duration: 0.5 })
+              }
+            }
+          })
+
+          scene.add(textMesh)
+          scene.add(boxMesh)
+        }
+
+        createButton('Sign Up', new THREE.Vector3(-25, -25, -50))
+        createButton('Log In', new THREE.Vector3(25, -25, -50))
+      },
+      undefined, // onProgress callback, not needed here
+      function (error) {
+        console.error('An error occurred while loading the font:', error)
       }
     )
 
-    // Camera position
-    camera.position.set(0, 0, 0) // Set camera position to the center
+    const animate = function () {
+      requestAnimationFrame(animate)
 
-    // Disable camera controls rotation
-    const controls = new OrbitControls(camera, renderer.domElement)
-    controls.enableRotate = false
+      /*if (clickOccurred && !navigationOccurred) {
+        raycaster.setFromCamera(mouse, camera)
+        const intersects = raycaster.intersectObjects(scene.children)
 
-    // Cleanup function
-    return () => {
-      renderer.domElement.removeEventListener('click', handleClick)
-      containerRef.current?.removeChild(renderer.domElement)
+        for (let i = 0; i < intersects.length; i++) {
+          if (intersects[i].object === signUpTextMesh) {
+            navigationOccurred = true
+            //navigate('/signup')
+          } else if (intersects[i].object === logInTextMesh) {
+            navigationOccurred = true
+            //navigate('/login')
+          }
+        }
+
+        clickOccurred = false
+      }*/
+
+      renderer.render(scene, camera)
     }
-  }, [])
+
+    animate()
+
+    const handleResize = () => {
+      // Update camera
+      camera.aspect = window.innerWidth / window.innerHeight
+      camera.updateProjectionMatrix()
+
+      // Update renderer
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      if (containerRef.current) {
+        window.removeEventListener('resize', handleResize)
+        renderer.domElement.style.touchAction = 'auto'
+        containerRef.current.removeChild(renderer.domElement)
+      }
+    }
+  }, [currentUser, navigate])
 
   return (
     <div className="">
       <BGparticles />
-      <div
-        ref={containerRef}
-        className="text-white min-h-full h-screen flex flex-col relative items-center justify-center pb-20"
-      ></div>
+      <div ref={containerRef} className="text-white absolute zindex-1"></div>
     </div>
   )
 }
-
-export default TitlePage
