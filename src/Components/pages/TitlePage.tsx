@@ -54,6 +54,7 @@ export const TitlePage = () => {
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableRotate = false
     controls.enableZoom = false
+    controls.enablePan = false
 
     renderer.domElement.style.touchAction = 'none'
 

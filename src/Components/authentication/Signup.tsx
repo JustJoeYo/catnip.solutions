@@ -6,6 +6,8 @@ import { LockClosedIcon } from '@heroicons/react/20/solid'
 import { ETypes, MessageCard } from '../Atoms/MessageCard'
 import { SocialSignIn } from './SocialSignIn'
 import BGparticles from '../particles/particles'
+import { useToast, EToastTypes } from '../../contexts/types'
+import LOGO from '../../../public/logo.png'
 
 export default function Signup() {
   const emailRef = useRef<HTMLInputElement>(null)
@@ -15,6 +17,7 @@ export default function Signup() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { showTypedToast } = useToast()
 
   useEffect(() => {
     if (currentUser) navigate('/dashboard')
@@ -31,6 +34,10 @@ export default function Signup() {
       setError('')
       setLoading(true)
       await signup(emailRef.current?.value, passwordRef.current?.value)
+      showTypedToast(
+        EToastTypes.SUCCESS,
+        'Please verify your email! Check your inbox for a verification email.'
+      )
       navigate('/dashboard')
     } catch {
       setError('Failed to create an account')
@@ -47,14 +54,18 @@ export default function Signup() {
           <div>
             <img
               className="mx-auto h-12 w-auto"
-              src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xMS41IC0xMC4yMzE3NCAyMyAyMC40NjM0OCI+CiAgPHRpdGxlPlJlYWN0IExvZ288L3RpdGxlPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIwIiByPSIyLjA1IiBmaWxsPSIjNjFkYWZiIi8+CiAgPGcgc3Ryb2tlPSIjNjFkYWZiIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIi8+CiAgICA8ZWxsaXBzZSByeD0iMTEiIHJ5PSI0LjIiIHRyYW5zZm9ybT0icm90YXRlKDYwKSIvPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIiB0cmFuc2Zvcm09InJvdGF0ZSgxMjApIi8+CiAgPC9nPgo8L3N2Zz4K"
+              src={LOGO}
               alt="Catnip.Solutions"
             />
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
               Create an account
             </h2>
           </div>
-          <MessageCard message={error} type={ETypes.DANGER} visible={Boolean(error)} />
+          <MessageCard
+            message={error}
+            type={ETypes.DANGER}
+            visible={Boolean(error)}
+          />
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="-space-y-px rounded-md shadow-sm">

@@ -32,8 +32,14 @@ function CheckoutPage({}: Props) {
           <span className="font-semibold">{item.name}</span>
           <span className="float-right text-gray-400">{item.quantity}</span>
           <p className="text-lg font-bold">
-            $
-            {item.salePrice ? item.salePrice.toFixed(2) : item.price.toFixed(2)}
+            {item.salePrice !== undefined && item.salePrice !== item.price ? (
+              <>
+                <span className="font-bold">${item.salePrice}</span>
+                <span className="text-sm line-through ml-2">${item.price}</span>
+              </>
+            ) : (
+              <span className="font-bold">${item.price}</span>
+            )}
           </p>
         </div>
         <div className="flex align-top justify-end self-start items-end text-right">
@@ -65,6 +71,12 @@ function CheckoutPage({}: Props) {
 
   const totalPrice = (cartItems || []).reduce(
     (total, item) => total + (item.salePrice || item.price) * item.quantity,
+    0
+  )
+
+  const totalSalePrice = (cartItems || []).reduce(
+    (total, item) =>
+      total + (item.price - (item.salePrice || item.price)) * item.quantity,
     0
   )
 
@@ -102,7 +114,7 @@ function CheckoutPage({}: Props) {
   return (
     <>
       {paypalCheckedOut ? (
-        <PayPal></PayPal>
+        <PayPal totalPrice={totalPrice}></PayPal>
       ) : (
         <div className="bg-white h-full w-full overflow-auto">
           <div className="grid sm:px-10 lg:grid-cols-2 lg:px-20 xl:px-32 h-full">
@@ -187,6 +199,9 @@ function CheckoutPage({}: Props) {
                       USD
                     </span>{' '}
                     ${`${totalPrice.toFixed(2)}`}
+                    <span className="text-sm line-through ml-2">
+                      ${totalSalePrice.toFixed(2)}
+                    </span>
                   </p>
                 </div>
               </div>
