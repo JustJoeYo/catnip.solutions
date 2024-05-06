@@ -93,7 +93,7 @@ function CheckoutPage({}: Props) {
         },
       })
     } catch (error) {
-      alert('An error has occurred; try again later!')
+      alert('Stripe is not available at the moment. Please try again later.')
     }
   }
   const paypalCheckout = async () => {
